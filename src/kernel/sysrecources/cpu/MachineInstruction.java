@@ -14,13 +14,20 @@ public class MachineInstruction {
     public static MachineInstruction parseToMachineCode(String code) {
         try {
             String[] t = code.split(" ");
+            int op = __opToInt(t[0]);
             if (t.length == 3) {
-                int op = __opToInt(t[0]);
+                if (op >= 0) {
+                    MachineInstruction machineCode = new MachineInstruction();
+                    machineCode.op = op;
+                    machineCode.dst = t[1];
+                    machineCode.src = t[2];
+                    return machineCode;
+                }
+            } else if (t.length == 2) {
                 if (op >= 0) {
                     MachineInstruction machineCode = new MachineInstruction();
                     machineCode.op = op;
                     machineCode.src = t[1];
-                    machineCode.dst = t[2];
                     return machineCode;
                 }
             }
@@ -36,8 +43,12 @@ public class MachineInstruction {
         switch (op.toLowerCase()) {
             case "add" -> {
                 return ADD;
-            } case "mov" -> {
+            }
+            case "mov" -> {
                 return MOV;
+            }
+            case "disp" -> {
+                return DISP;
             }
         }
         return -1;
@@ -48,6 +59,7 @@ public class MachineInstruction {
         switch (op) {
             case ADD -> opStr = "ADD";
             case MOV -> opStr = "MOV";
+            case DISP -> opStr = "DISP";
         }
         return opStr + " " + src + " " + dst;
     }

@@ -3,6 +3,7 @@ package kernel.process;
 import kernel.programme.Programme;
 import kernel.programme.code.Text;
 import kernel.sysrecources.cpu.CPU;
+import kernel.sysrecources.cpu.MachineInstruction;
 
 public class SysProcess {
     // programme class is an abstraction for running process
@@ -22,9 +23,6 @@ public class SysProcess {
     int __state;
     int __exit_state;
 
-    private SysProcess() {
-
-    }
 
 
     /**
@@ -33,11 +31,11 @@ public class SysProcess {
      * @param i virtual address in code segment
      * @return instruction string, null if out of bounds
      */
-    public String getInstructionAt(int i) {
-        if (i >= __textSeg.instructions.size())
-            return null;
-        return __textSeg.instructions.get(i);
-    }
+//    public String getInstructionAt(int i) {
+//        if (i >= __textSeg.instructions.size())
+//            return null;
+//        return __textSeg.instructions.get(i);
+//    }
 
     /**
      * get data of the programme at its virtual address (data segment)
@@ -71,6 +69,15 @@ public class SysProcess {
 
     public void setState(int __state) {
         this.__state = __state;
+    }
+
+    public MachineInstruction getInstructionAt(int ip) {
+        try {
+            String instruction = __textSeg.instructions.get(ip);
+            return MachineInstruction.parseToMachineCode(instruction);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     public static int TASK_RUNNING = 0;

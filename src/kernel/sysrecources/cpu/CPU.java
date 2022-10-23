@@ -1,6 +1,7 @@
 package kernel.sysrecources.cpu;
 
 import kernel.process.SysProcess;
+import kernel.programme.Programme;
 
 public class CPU {
     private int __cpuid; // for multi core cpu
@@ -17,11 +18,10 @@ public class CPU {
      * @return
      */
     public boolean execOneInstruction() {
-        String code = __curProc.getInstructionAt(__ip);
-        if (code.length() == 0)
+        MachineInstruction instruction = __curProc.getInstructionAt(__ip);
+        if (instruction == null)
             return false;
-        MachineInstruction instruction = MachineInstruction.parseToMachineCode(code);
-        MachineInstructionParser.executeOneInstruction(this, instruction);
+        MachineInstructionExecutor.executeOneInstruction(this, instruction);
         return true;
     }
 
@@ -71,46 +71,58 @@ public class CPU {
         return true;
     }
 
-    public void runCPU() {
-
+    public void test_execProgramme(Programme p) {
+        __curProc = SysProcess.getInstance(p);
+        while (execOneInstruction())
+            ;
     }
 
 
     // ----------------------------------- cpu execution at machine level ---------------------------------------------
-    void __doAddOp(String src, String dst) {
-        System.out.println("[debug]: add " + src + " " + dst);
+    void __doAddOp(String dst, String src) {
+        System.out.println("[CPU To Execute]: add " + src + " " + dst);
         int srcRegNo = __parseRegister(src);
         int dstRegNo = __parseRegister(dst);
-        __commRegs[srcRegNo] = __commRegs[srcRegNo] + __commRegs[dstRegNo];
+        __commRegs[dstRegNo] = __commRegs[srcRegNo] + __commRegs[dstRegNo];
+        System.out.println("[CPU ADD]: %r" + dst + " <- " + __commRegs[dstRegNo]);
         __ip++; // points to next instruction
     }
 
-    void __doMovOp(String src, String dst) {
-        System.out.println("[debug]: mov " + src + " " + dst);
+    void __doMovOp(String dst, String src) {
+        System.out.println("[CPU To Execute]: mov " + src + " " + dst);
 
         int srcType = __whichTypeOfArg(src);
         int dstType = __whichTypeOfArg(dst);
 
-
-        // immediate number cannot be the destination
-
+        if (srcType == IMMEDNUM && dstType == REGISTER) { // supports moving a immediate number to a register
+            int dstRegNo = __parseRegister(dst);
+            __commRegs[dstRegNo] = __parseImmediateNumber(src);
+            System.out.println("[CPU MOV]: %r" + dstRegNo + " <- " + __commRegs[dstRegNo]);
+        }
         __ip++; // points to next instruction
     }
 
-    void __doJmpOp(String addr) {
-        System.out.println("[debug]: jmp " + addr);
-
-//        __ip = addr;
+    void __doJmpOp(String addrString) {
+        System.out.println("[CPU To Execute]: jmp " + addrString);
+        try {
+            int addr = Integer.parseInt(addrString);
+            __ip = addr;
+        } catch (Exception e) {
+            System.out.println("[CPU ERROR] invalid address");
+        }
     }
 
     void __doDispOp(String src) {
         int commRegNo = __parseRegister(src);
-        System.out.println("[debug]: disp %r" + commRegNo);
+        System.out.println("[CPU Instruction]: disp %r" + commRegNo);
         System.out.println(__commRegs[commRegNo]);
-
         __ip++;
     }
 
+    final int IMMEDNUM = 0;
+    final int REGISTER = 1;
+    final int MEMADDR = 2;
+//    final int
     private static int __whichTypeOfArg(String arg) {
         if (arg.startsWith("$")) // immediate number
             return 0;

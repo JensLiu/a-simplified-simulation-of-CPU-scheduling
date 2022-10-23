@@ -1,6 +1,6 @@
 package kernel.sysrecources.cpu;
 
-public class MachineInstructionParser {
+public class MachineInstructionExecutor {
 
     /**
      * parse machine code
@@ -9,15 +9,15 @@ public class MachineInstructionParser {
      */
     public static void executeOneInstruction(CPU cpu, MachineInstruction code) {
 
-        System.out.println(code.toString());
+        System.out.println("[Machine Code Executor]: " + code.toString());
 
         switch (code.op) {
             case MachineInstruction.ADD: {
-                cpu.__doAddOp(code.src, code.dst);
+                cpu.__doAddOp(code.dst, code.src);
                 break;
             }
             case MachineInstruction.MOV: {
-                cpu.__doMovOp(code.src, code.dst);
+                cpu.__doMovOp(code.dst, code.src);
                 break;
             }
             case MachineInstruction.DISP: {
