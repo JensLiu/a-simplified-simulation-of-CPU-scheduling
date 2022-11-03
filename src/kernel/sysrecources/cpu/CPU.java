@@ -18,10 +18,12 @@ public class CPU {
      * @return
      */
     public boolean execOneInstruction() {
+        System.out.println("[CPU]: to execute instruction for process " + __curProc);
         MachineInstruction instruction = __curProc.getInstructionAt(__ip);
         if (instruction == null)
             return false;
         MachineInstructionExecutor.executeOneInstruction(this, instruction);
+        System.out.println("[CPU]: end of execution for process " + __curProc);
         return true;
     }
 
@@ -116,6 +118,11 @@ public class CPU {
         int commRegNo = __parseRegister(src);
         System.out.println("[CPU Instruction]: disp %r" + commRegNo);
         System.out.println(__commRegs[commRegNo]);
+        __ip++;
+    }
+
+    void __doNop() {
+        System.out.println("[CPU Instruction]: nop");
         __ip++;
     }
 

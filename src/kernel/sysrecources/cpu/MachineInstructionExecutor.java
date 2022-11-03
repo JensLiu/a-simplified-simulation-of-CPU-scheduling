@@ -9,7 +9,7 @@ public class MachineInstructionExecutor {
      */
     public static void executeOneInstruction(CPU cpu, MachineInstruction code) {
 
-        System.out.println("[Machine Code Executor]: " + code.toString());
+        System.out.println("[Machine Code Executor]: execute " + code.toString());
 
         switch (code.op) {
             case MachineInstruction.ADD: {
@@ -22,6 +22,9 @@ public class MachineInstructionExecutor {
             }
             case MachineInstruction.DISP: {
                 cpu.__doDispOp(code.src);
+            }
+            case MachineInstruction.NOP: {
+                cpu.__doNop();
             }
         }
     }

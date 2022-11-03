@@ -9,6 +9,7 @@ public class MachineInstruction {
     public static final int ADD = 1;
     public static final int MOV = 2;
     public static final int DISP = 3;
+    public static final int NOP = 4;
 
 
     public static MachineInstruction parseToMachineCode(String code) {
@@ -30,6 +31,10 @@ public class MachineInstruction {
                     machineCode.src = t[1];
                     return machineCode;
                 }
+            } else if (t.length == 1) {
+                MachineInstruction machineCode = new MachineInstruction();
+                machineCode.op = op;
+                return machineCode;
             }
         } catch (Exception e) {
             return null;
@@ -50,6 +55,9 @@ public class MachineInstruction {
             case "disp" -> {
                 return DISP;
             }
+            case "nop" -> {
+                return NOP;
+            }
         }
         return -1;
     }
@@ -60,6 +68,7 @@ public class MachineInstruction {
             case ADD -> opStr = "ADD";
             case MOV -> opStr = "MOV";
             case DISP -> opStr = "DISP";
+            case NOP -> opStr = "NOP";
         }
         return opStr + " " + src + " " + dst;
     }

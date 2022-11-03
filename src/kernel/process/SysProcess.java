@@ -86,8 +86,19 @@ public class SysProcess {
     }
 
     public void handleTimer() {
-        // early linux
-        __counter = __counter >> 1 + __priority;
+        __counter--;
+    }
+
+    public void handleSchedule() {
+        __counter = (__counter >> 1) + __priority;
+    }
+
+    public int getCounter() {
+        return __counter;
+    }
+
+    public boolean outOfTimeSlice() {
+        return __counter <= 0;
     }
 
     public static int TASK_RUNNING = 0;

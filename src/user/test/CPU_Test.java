@@ -16,6 +16,6 @@ public class CPU_Test {
         prog.text.instructions.add("DISP %r2");
 
         CPU cpu = new CPU();
-        cpu.test_execProgramme(prog);
+//        cpu.test_execProgramme(prog);
     }
 }
