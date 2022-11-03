@@ -1,5 +1,6 @@
 package kernel.process;
 
+import kernel.Kernel;
 import kernel.programme.Programme;
 import kernel.programme.code.Text;
 import kernel.sysrecources.cpu.CPU;
@@ -8,7 +9,6 @@ import kernel.sysrecources.cpu.MachineInstruction;
 public class SysProcess {
     // programme class is an abstraction for running process
     // programme points to its own virtual address space, no need to worry about the physical address
-
 
     // hardware resources
     CPU __cpu; // executing core
@@ -23,6 +23,9 @@ public class SysProcess {
     int __state;
     int __exit_state;
 
+    // priority
+    int __priority;
+    int __counter;
 
 
     /**
@@ -48,10 +51,12 @@ public class SysProcess {
         return i;
     }
 
-    public static synchronized SysProcess getInstance(Programme programme) {
+    public static synchronized SysProcess getInstance(Programme programme, int priority) {
         SysProcess process = new SysProcess();
         process.__textSeg = new Text(programme.text); // deep copy of the text segment in the code
         process.__ip = 0; // set instruction pointer to 0 of the code segment
+        process.__priority = priority;
+        process.__counter = Kernel.PROGRAMME_SLICE;
         return process;
     }
 
@@ -78,6 +83,11 @@ public class SysProcess {
         } catch (IndexOutOfBoundsException e) {
             return null;
         }
+    }
+
+    public void handleTimer() {
+        // early linux
+        __counter = __counter >> 1 + __priority;
     }
 
     public static int TASK_RUNNING = 0;

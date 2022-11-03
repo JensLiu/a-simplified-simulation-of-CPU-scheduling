@@ -71,11 +71,11 @@ public class CPU {
         return true;
     }
 
-    public void test_execProgramme(Programme p) {
-        __curProc = SysProcess.getInstance(p);
-        while (execOneInstruction())
-            ;
-    }
+//    public void test_execProgramme(Programme p) {
+//        __curProc = SysProcess.getInstance(p);
+//        while (execOneInstruction())
+//            ;
+//    }
 
 
     // ----------------------------------- cpu execution at machine level ---------------------------------------------
