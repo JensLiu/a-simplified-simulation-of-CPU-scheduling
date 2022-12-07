@@ -12,28 +12,23 @@ public class MachineInstruction {
     public static final int NOP = 4;
     public static final int JMP = 5;
 
-
     public static MachineInstruction parseToMachineCode(String code) {
         try {
             String[] t = code.split(" ");
             int op = __opToInt(t[0]);
             assert (op > -1);
-            if (t.length == 3) {
-                if (op >= 0) {
-                    MachineInstruction machineCode = new MachineInstruction();
-                    machineCode.op = op;
-                    machineCode.dst = t[1];
-                    machineCode.src = t[2];
-                    return machineCode;
-                }
-            } else if (t.length == 2) {
-                if (op >= 0) {
-                    MachineInstruction machineCode = new MachineInstruction();
-                    machineCode.op = op;
-                    machineCode.src = t[1];
-                    return machineCode;
-                }
-            } else if (t.length == 1) {
+            if (t.length == 3 && op >= 0) {
+                MachineInstruction machineCode = new MachineInstruction();
+                machineCode.op = op;
+                machineCode.src = t[1];
+                machineCode.dst = t[2];
+                return machineCode;
+            } else if (t.length == 2 && op >= 0) {
+                MachineInstruction machineCode = new MachineInstruction();
+                machineCode.op = op;
+                machineCode.src = t[1];
+                return machineCode;
+            } else if (t.length == 1 && op >= 0) {
                 MachineInstruction machineCode = new MachineInstruction();
                 machineCode.op = op;
                 return machineCode;

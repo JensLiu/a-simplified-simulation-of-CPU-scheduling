@@ -10,14 +10,13 @@ public class SysProcess {
     // programme class is an abstraction for a running process
     // programme points to its own virtual address space, no need to worry about the physical address
 
-    // hardware resources
-//    CPU __cpu; // executing core
-
     // virtual memory
     Text __textSeg; // code segment of the process
 
     // context
     int __ip; // CPU instruction pointer register
+    int[] __commRegs = new int[CPU.N_COMMREGS]; // %r0 to %r10
+    int[] __flagRegs = new int[CPU.N_RLAGREGS]; // flag registers
 
     // execution status
     int __state;
@@ -27,18 +26,6 @@ public class SysProcess {
     int __priority;
     int __counter;
 
-
-    /**
-     * get instruction of the programme  iatts virtual address (code segment)
-     *
-     * @param i virtual address in code segment
-     * @return instruction string, null if out of bounds
-     */
-//    public String getInstructionAt(int i) {
-//        if (i >= __textSeg.instructions.size())
-//            return null;
-//        return __textSeg.instructions.get(i);
-//    }
 
     /**
      * get data of the programme at its virtual address (data segment)
@@ -58,6 +45,14 @@ public class SysProcess {
         process.__priority = priority;
         process.__counter = Kernel.PROGRAMME_SLICE;
         return process;
+    }
+
+    public int[] getCommRegs() {
+        return __commRegs;
+    }
+
+    public int[] getFlagRegs() {
+        return __flagRegs;
     }
 
     public void setInstructionPointer(int ip) {
@@ -92,6 +87,11 @@ public class SysProcess {
     public void updateCounterOnSchedule() {
         __counter = (__counter >> 1) + __priority;
     }
+
+    private void __updateCounterOnSchedule_rr() {
+        __counter = Kernel.PROGRAMME_SLICE;
+    }
+
 
     public int getCounter() {
         return __counter;

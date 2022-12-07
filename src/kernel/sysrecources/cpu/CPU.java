@@ -7,11 +7,14 @@ public class CPU {
     private int __cpuid; // for multi core cpu
     private SysProcess __curProc;
 
+    public static final int N_COMMREGS = 10;
+    public static final int N_RLAGREGS = 1;
+
     // registers
     int __ip; // instruction pointer, lets pretend that each instruction has the same length
               // and use the index of the instruction array (an array of strings) as __ip
-    int[] __commRegs = new int[10]; // %r0 to %r10
-    int[] __flagRegs = new int[1]; // flag registers
+    int[] __commRegs = new int[CPU.N_COMMREGS]; // %r0 to %r10
+    int[] __flagRegs = new int[CPU.N_RLAGREGS]; // flag registers
 
     /**
      * CPU executes one instruction (ip is the virtual address
@@ -32,8 +35,16 @@ public class CPU {
      * @param proc
      * @return
      */
-    public boolean storeContext(SysProcess proc) {
+    private boolean __storeContext(SysProcess proc) {
         proc.setInstructionPointer(__ip);
+        int[] pCommRegs = proc.getCommRegs();
+        int[] pFlagRegs = proc.getFlagRegs();
+        for (int i = 0; i < CPU.N_COMMREGS; i++) {
+            pCommRegs[i] = __commRegs[i];
+        }
+        for (int i = 0; i < CPU.N_RLAGREGS; i++) {
+            pFlagRegs[i] = __flagRegs[i];
+        }
         return true;
     }
 
@@ -42,7 +53,21 @@ public class CPU {
      * @return
      */
     public boolean saveContext() {
-        storeContext(__curProc);
+        __storeContext(__curProc);
+        return true;
+    }
+
+
+    private boolean __recoverContext(SysProcess proc) {
+        __ip = proc.getInstructionPointer();
+        int[] pCommRegs = proc.getCommRegs();
+        int[] pFlagRegs = proc.getFlagRegs();
+        for (int i = 0; i < CPU.N_COMMREGS; i++) {
+            __commRegs[i] = pCommRegs[i];
+        }
+        for (int i = 0; i < CPU.N_RLAGREGS; i++) {
+            __flagRegs[i] = pFlagRegs[i];
+        }
         return true;
     }
 
@@ -53,7 +78,7 @@ public class CPU {
      */
     public boolean switchToTask(SysProcess task) {
         // setup context
-        __ip = task.getInstructionPointer();
+        __recoverContext(task);
 
         // change the reference
         __curProc = task;
@@ -100,7 +125,7 @@ public class CPU {
         int srcType = __whichTypeOfArg(src);
         int dstType = __whichTypeOfArg(dst);
 
-        if (srcType == IMMEDNUM && dstType == REGISTER) { // supports moving a immediate number to a register
+        if (srcType == IMMEDNUM && dstType == REGISTER) { // supports moving an immediate number to a register
             int dstRegNo = __parseRegister(dst);
             __commRegs[dstRegNo] = __parseImmediateNumber(src);
             System.out.println("[CPU MOV]: %r" + dstRegNo + " <- " + __commRegs[dstRegNo]);

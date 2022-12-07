@@ -2,14 +2,9 @@ package kernel.sysrecources.cpu;
 
 public class MachineInstructionExecutor {
 
-    /**
-     * parse machine code
-     * @param cpu
-     * @param code
-     */
     public static void executeOneInstruction(CPU cpu, MachineInstruction code) {
 
-        System.out.println("[Machine Code Executor]: execute " + code.toString());
+//        System.out.println("[Machine Code Executor]: execute " + code.toString());
 
         switch (code.op) {
             case MachineInstruction.ADD: {
@@ -22,12 +17,15 @@ public class MachineInstructionExecutor {
             }
             case MachineInstruction.DISP: {
                 cpu.__doDispOp(code.src);
+                break;
             }
             case MachineInstruction.NOP: {
                 cpu.__doNop();
+                break;
             }
             case MachineInstruction.JMP: {
                 cpu.__doJmpOp(code.src);
+                break;
             }
         }
     }
