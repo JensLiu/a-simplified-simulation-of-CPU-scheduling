@@ -21,14 +21,40 @@ public class CPU {
      * @return
      */
     public boolean execOneInstruction() {
-        System.out.println("[CPU]: to execute instruction for process " + __curProc);
+//        System.out.println("[CPU]: to execute instruction for process " + __curProc);
         MachineInstruction instruction = __curProc.getInstructionAt(__ip);
         if (instruction == null)
             return false;
         __executeOneInstruction(instruction);
-//        MachineInstructionExecutor.executeOneInstruction(this, instruction);
 //        System.out.println("[CPU]: end of execution for process " + __curProc);
         return true;
+    }
+
+    /**
+     * CPU save the context of current executing process to its pcb
+     * @return
+     */
+    public boolean saveContext() {
+        __storeContext(__curProc);
+        return true;
+    }
+
+    /**
+     * CPU switch to its next task by recovering the next task's context
+     * @param proc
+     * @return
+     */
+    public boolean switchTo(SysProcess proc) {
+        // setup context
+        __recoverContext(proc);
+
+        // change the reference
+        __curProc = proc;
+        return true;
+    }
+
+    public void removeCurProc() {
+        __curProc = null;
     }
 
     /**
@@ -49,15 +75,6 @@ public class CPU {
         return true;
     }
 
-    /**
-     * CPU save the context of current executing process to its pcb
-     * @return
-     */
-    public boolean saveContext() {
-        __storeContext(__curProc);
-        return true;
-    }
-
 
     private boolean __recoverContext(SysProcess proc) {
         __ip = proc.getInstructionPointer();
@@ -69,20 +86,6 @@ public class CPU {
         for (int i = 0; i < CPU.N_RLAGREGS; i++) {
             __flagRegs[i] = pFlagRegs[i];
         }
-        return true;
-    }
-
-    /**
-     * CPU switch to its next task by recovering the next task's context
-     * @param task
-     * @return
-     */
-    public boolean switchToTask(SysProcess task) {
-        // setup context
-        __recoverContext(task);
-
-        // change the reference
-        __curProc = task;
         return true;
     }
 
@@ -99,18 +102,7 @@ public class CPU {
         return true;
     }
 
-    public void test_execProgramme(Programme p) {
-        __curProc = SysProcess.getInstance(p, 1);
-        while (execOneInstruction())
-            ;
-    }
-
-    public void removeCurProc() {
-        __curProc = null;
-    }
-
     public void __executeOneInstruction(MachineInstruction code) {
-
         switch (code.op) {
             case MachineInstruction.ADD: {
                 __doAddOp(code.src, code.dst);
@@ -137,54 +129,54 @@ public class CPU {
 
     // ----------------------------------- cpu execution ---------------------------------------------
     void __doAddOp(String src, String dst) {
-        System.out.println("[CPU To Execute]: add " + src + " " + dst);
+//        System.out.println("[CPU To Execute]: add " + src + " " + dst);
         int srcRegNo = __parseRegister(src);
         int dstRegNo = __parseRegister(dst);
         __commRegs[dstRegNo] = __commRegs[srcRegNo] + __commRegs[dstRegNo];
-        System.out.println("[CPU ADD]: " + dst + " <- " + __commRegs[dstRegNo]);
+        System.out.println(__curProc.hashCode() + "\t[CPU ADD]: " + dst + " <- " + __commRegs[dstRegNo]);
         __ip++; // points to next instruction
     }
 
     void __doMovOp(String src, String dst) {
-        System.out.println("[CPU To Execute]: mov " + src + " " + dst);
-
+//        System.out.println("[CPU To Execute]: mov " + src + " " + dst);
         int srcType = __whichTypeOfArg(src);
         int dstType = __whichTypeOfArg(dst);
 
         if (srcType == IMMEDNUM && dstType == REGISTER) { // supports moving an immediate number to a register
             int dstRegNo = __parseRegister(dst);
             __commRegs[dstRegNo] = __parseImmediateNumber(src);
-            System.out.println("[CPU MOV]: %r" + dstRegNo + " <- " + __commRegs[dstRegNo]);
+            System.out.println(__curProc.hashCode() + "\t[CPU MOV]: %r" + dstRegNo + " <- " + __commRegs[dstRegNo]);
         }
         __ip++; // points to next instruction
     }
 
     void __doJmpOp(String addrString) {
-        System.out.println("[CPU To Execute]: jmp " + addrString);
+//        System.out.println("[CPU To Execute]: jmp " + addrString);
         try {
             int addr = Integer.parseInt(addrString);
             __ip = addr;
+            System.out.println(__curProc.hashCode() + "\t[CPU JMP]: jmp " + addr);
         } catch (Exception e) {
-            System.out.println("[CPU ERROR] invalid address");
+            System.out.println(__curProc.hashCode() + "\t[CPU ERROR] invalid address");
         }
     }
 
     void __doDispOp(String src) {
         int commRegNo = __parseRegister(src);
-        System.out.println("[CPU Instruction]: disp %r" + commRegNo);
-        System.out.println(__commRegs[commRegNo]);
+        System.out.println(__curProc.hashCode() + "\t[CPU Instruction]: disp %r" + commRegNo);
+        System.out.println(__curProc.hashCode() + "\t" + __commRegs[commRegNo]);
         __ip++;
     }
 
     void __doNop() {
-        System.out.println("[CPU Instruction]: nop");
+        System.out.println(__curProc.hashCode() + "\t[CPU Instruction]: nop");
         __ip++;
     }
 
     final int IMMEDNUM = 0;
     final int REGISTER = 1;
     final int MEMADDR = 2;
-//    final int
+
     private static int __whichTypeOfArg(String arg) {
         if (arg.startsWith("$")) // immediate number
             return 0;
@@ -213,7 +205,6 @@ public class CPU {
             try {
                 return Integer.parseInt(regSplit[1]);
             } catch (Exception e) {
-//                e.printStackTrace();
                 return -1;
             }
         }
