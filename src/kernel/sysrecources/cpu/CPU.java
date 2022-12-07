@@ -25,7 +25,8 @@ public class CPU {
         MachineInstruction instruction = __curProc.getInstructionAt(__ip);
         if (instruction == null)
             return false;
-        MachineInstructionExecutor.executeOneInstruction(this, instruction);
+        __executeOneInstruction(instruction);
+//        MachineInstructionExecutor.executeOneInstruction(this, instruction);
 //        System.out.println("[CPU]: end of execution for process " + __curProc);
         return true;
     }
@@ -108,9 +109,34 @@ public class CPU {
         __curProc = null;
     }
 
+    public void __executeOneInstruction(MachineInstruction code) {
+
+        switch (code.op) {
+            case MachineInstruction.ADD: {
+                __doAddOp(code.src, code.dst);
+                break;
+            }
+            case MachineInstruction.MOV: {
+                __doMovOp(code.src, code.dst);
+                break;
+            }
+            case MachineInstruction.DISP: {
+                __doDispOp(code.src);
+                break;
+            }
+            case MachineInstruction.NOP: {
+                __doNop();
+                break;
+            }
+            case MachineInstruction.JMP: {
+                __doJmpOp(code.src);
+                break;
+            }
+        }
+    }
 
     // ----------------------------------- cpu execution ---------------------------------------------
-    void __doAddOp(String dst, String src) {
+    void __doAddOp(String src, String dst) {
         System.out.println("[CPU To Execute]: add " + src + " " + dst);
         int srcRegNo = __parseRegister(src);
         int dstRegNo = __parseRegister(dst);
@@ -119,7 +145,7 @@ public class CPU {
         __ip++; // points to next instruction
     }
 
-    void __doMovOp(String dst, String src) {
+    void __doMovOp(String src, String dst) {
         System.out.println("[CPU To Execute]: mov " + src + " " + dst);
 
         int srcType = __whichTypeOfArg(src);

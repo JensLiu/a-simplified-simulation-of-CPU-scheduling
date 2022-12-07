@@ -19,7 +19,5 @@ public class CPU_Test {
         kernel.createProcess(prog);
         kernel.createProcess(prog);
         kernel.startKernel();
-//        CPU cpu = new CPU();
-//        cpu.test_execProgramme(prog);
     }
 }
