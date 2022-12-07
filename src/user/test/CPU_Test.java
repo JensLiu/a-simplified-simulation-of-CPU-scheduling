@@ -1,5 +1,6 @@
 package user.test;
 
+import kernel.Kernel;
 import kernel.programme.Programme;
 import kernel.sysrecources.cpu.CPU;
 
@@ -15,7 +16,10 @@ public class CPU_Test {
         prog.text.instructions.add("DISP %r1");
         prog.text.instructions.add("DISP %r2");
 
-        CPU cpu = new CPU();
+        Kernel kernel = new Kernel();
+        kernel.createProcess(prog);
+        kernel.startKernel();
+//        CPU cpu = new CPU();
 //        cpu.test_execProgramme(prog);
     }
 }

@@ -23,7 +23,7 @@ public class CPU {
         if (instruction == null)
             return false;
         MachineInstructionExecutor.executeOneInstruction(this, instruction);
-        System.out.println("[CPU]: end of execution for process " + __curProc);
+//        System.out.println("[CPU]: end of execution for process " + __curProc);
         return true;
     }
 
@@ -73,20 +73,24 @@ public class CPU {
         return true;
     }
 
-//    public void test_execProgramme(Programme p) {
-//        __curProc = SysProcess.getInstance(p);
-//        while (execOneInstruction())
-//            ;
-//    }
+    public void test_execProgramme(Programme p) {
+        __curProc = SysProcess.getInstance(p, 1);
+        while (execOneInstruction())
+            ;
+    }
+
+    public void removeCurProc() {
+        __curProc = null;
+    }
 
 
-    // ----------------------------------- cpu execution at machine level ---------------------------------------------
+    // ----------------------------------- cpu execution ---------------------------------------------
     void __doAddOp(String dst, String src) {
         System.out.println("[CPU To Execute]: add " + src + " " + dst);
         int srcRegNo = __parseRegister(src);
         int dstRegNo = __parseRegister(dst);
         __commRegs[dstRegNo] = __commRegs[srcRegNo] + __commRegs[dstRegNo];
-        System.out.println("[CPU ADD]: %r" + dst + " <- " + __commRegs[dstRegNo]);
+        System.out.println("[CPU ADD]: " + dst + " <- " + __commRegs[dstRegNo]);
         __ip++; // points to next instruction
     }
 

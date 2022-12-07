@@ -10,12 +10,14 @@ public class MachineInstruction {
     public static final int MOV = 2;
     public static final int DISP = 3;
     public static final int NOP = 4;
+    public static final int JMP = 5;
 
 
     public static MachineInstruction parseToMachineCode(String code) {
         try {
             String[] t = code.split(" ");
             int op = __opToInt(t[0]);
+            assert (op > -1);
             if (t.length == 3) {
                 if (op >= 0) {
                     MachineInstruction machineCode = new MachineInstruction();
@@ -58,6 +60,9 @@ public class MachineInstruction {
             case "nop" -> {
                 return NOP;
             }
+            case "jmp" -> {
+                return JMP;
+            }
         }
         return -1;
     }
@@ -69,6 +74,7 @@ public class MachineInstruction {
             case MOV -> opStr = "MOV";
             case DISP -> opStr = "DISP";
             case NOP -> opStr = "NOP";
+            case JMP -> opStr = "JMP";
         }
         return opStr + " " + src + " " + dst;
     }

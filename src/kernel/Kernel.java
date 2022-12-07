@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Kernel {
 
     public static final int TIMESLICE_MS = 1000;
-    public static final int PROGRAMME_SLICE = 3;
+    public static final int PROGRAMME_SLICE = 2;
 
     //    ArrayList<CPU> cpus;
     CPU __cpu; // assume single core
@@ -41,49 +41,61 @@ public class Kernel {
     }
 
     private void __schedule() {
-        System.out.println("[Kernel]: schedule");
+        System.out.println("[Kernel]: schedule------------------------------------------------------------------");
         for (SysProcess p : __all) {
-            p.handleSchedule();
+            p.updateCounterOnSchedule();
         }
 
         SysProcess process = __cpu.getCurProc();
         if (process != null) {
-            __ready.add(process);
+            __ready.add(process); // add it to ready queue
             __cpu.saveContext(); // eq to __cpu.storeContext(__cpu.getCurProc())
         }
 
+//        System.out.println("[Kernel]: no process, try to reschedule");
+
         // get the next process, set context
         SysProcess nextProc = __getNextTask();
-        __cpu.switchToTask(nextProc);
+        if (nextProc != null) {
+            __cpu.switchToTask(nextProc);
+        } else {
+            System.out.println("[Kernel]: no process");
+        }
 
     }
 
     private SysProcess __getNextTask() {
-        __ready.sort(new Comparator<SysProcess>() {
+        __ready.sort(new Comparator<SysProcess>() { // sort ready queue in the descending order of counter
             @Override
             public int compare(SysProcess o1, SysProcess o2) {
                 return o2.getCounter() - o1.getCounter();
             }
         });
-        System.out.println(__ready);
-        SysProcess next = __ready.remove(0); // remove next task from ready queue
-        return next;
+
+//        System.out.println(__ready);
+        if (__ready.size() > 0) {
+            SysProcess next = __ready.remove(0); // remove next task from ready queue, return it to execute
+            return next;
+        } else {
+            return null;
+        }
     }
 
      void __timerInterruptHandler() {
 
-        System.out.print("[Kernel Interrupt]: timer interrupt \t");
+//        System.out.println("[Kernel Interrupt]: timer interrupt ***************************************");
         SysProcess p = __cpu.getCurProc();
         if (p != null) {
-            p.handleTimer();
-            System.out.print("[Kernel]:" + p.toString() +  " counter = " + p.getCounter() + "\t");
-        }
-         System.out.println("[kernel]: all processes: ");
-        for (SysProcess pr : __all) {
-            System.out.println(pr + "\t" + pr.getCounter());
+            p.updateCounterOnTimer();
+//            System.out.println("[Kernel]:" + p.toString() +  " counter = " + p.getCounter() + "\t");
         }
 
-         System.out.println("[Kernel Interrupt]: end timer interrupt");
+        // show
+//         System.out.println("[kernel]: all processes: ");
+//        for (SysProcess pr : __all) {
+//            System.out.println(pr + "\t" + pr.getCounter());
+//        }
+//         System.out.println("[Kernel Interrupt]: end timer interrupt ************************************");
 
     }
 
@@ -95,13 +107,19 @@ public class Kernel {
     void __runKernel() {
         while (true) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(800);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             SysProcess process = __cpu.getCurProc();
+
+            // executing and scheduling
             if (process != null && process.getCounter() > 0) {
-                __cpu.execOneInstruction();
+                if (!__cpu.execOneInstruction()) {
+                    __all.remove(process);
+                    __cpu.removeCurProc();
+                }
             } else {
                 __schedule();
             }

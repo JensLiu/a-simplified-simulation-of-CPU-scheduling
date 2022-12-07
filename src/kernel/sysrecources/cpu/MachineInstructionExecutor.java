@@ -26,6 +26,9 @@ public class MachineInstructionExecutor {
             case MachineInstruction.NOP: {
                 cpu.__doNop();
             }
+            case MachineInstruction.JMP: {
+                cpu.__doJmpOp(code.src);
+            }
         }
     }
 }

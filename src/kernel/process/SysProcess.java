@@ -7,11 +7,11 @@ import kernel.sysrecources.cpu.CPU;
 import kernel.sysrecources.cpu.MachineInstruction;
 
 public class SysProcess {
-    // programme class is an abstraction for running process
+    // programme class is an abstraction for a running process
     // programme points to its own virtual address space, no need to worry about the physical address
 
     // hardware resources
-    CPU __cpu; // executing core
+//    CPU __cpu; // executing core
 
     // virtual memory
     Text __textSeg; // code segment of the process
@@ -85,11 +85,11 @@ public class SysProcess {
         }
     }
 
-    public void handleTimer() {
+    public void updateCounterOnTimer() {
         __counter--;
     }
 
-    public void handleSchedule() {
+    public void updateCounterOnSchedule() {
         __counter = (__counter >> 1) + __priority;
     }
 
